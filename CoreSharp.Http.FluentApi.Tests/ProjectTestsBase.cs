@@ -1,32 +1,18 @@
 ﻿using AutoFixture;
-using AutoFixture.AutoNSubstitute;
-using AutoFixture.NUnit3;
 using CoreSharp.Http.FluentApi.Steps.Interfaces;
-using NSubstitute;
-using Tests.Internal.HttpmessageHandlers;
+using System.Net;
+using Tests.Common;
+using Tests.Common.Mocks;
 
-namespace Tests.Internal.Attributes;
+namespace CoreSharp.Http.FluentApi.Tests;
 
-public sealed class AutoNSubstituteDataAttribute : AutoDataAttribute
+public abstract class ProjectTestsBase : TestsBase
 {
-    public AutoNSubstituteDataAttribute()
-        : base(GetFixture)
+    protected override void ConfigureFixture(IFixture fixture)
     {
-    }
-
-    private static IFixture GetFixture()
-    {
-        var fixture = new Fixture();
-        fixture.Customize(new AutoNSubstituteCustomization()
-        {
-            ConfigureMembers = true
-        });
-
-        fixture.Register<IFixture>(() => fixture);
-
         fixture.Register(() => new MockHttpMessageHandler()
         {
-            ResponseStatus = System.Net.HttpStatusCode.OK,
+            HttpResponseMessageFactory = () => new HttpResponseMessage(HttpStatusCode.OK)
         });
 
         fixture.Register(() =>
@@ -61,6 +47,6 @@ public sealed class AutoNSubstituteDataAttribute : AutoDataAttribute
             return endpoint;
         });
 
-        return fixture;
+        fixture.Register(() => Substitute.For<MemoryStream>());
     }
 }
